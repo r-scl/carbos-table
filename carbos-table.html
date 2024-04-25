@@ -23,29 +23,25 @@
             background-color: #fffbcc;
         }
         .pagination-wrapper nav {
-            margin-top: 20px; /* Spacing above the pagination bar */
+            margin-top: 20px;
         }
         .active {
-            color: #fff; /* White text for active buttons */
-            background-color: #007bff !important; /* Bootstrap primary color */
-            border-color: #007bff !important; /* Matching border color */
-}
-.glycemic-low {
-    background-color: green;
-    color: white; /* Example color for low glycemic index */
-}
-
-.glycemic-medium {
-    background-color: yellow;
-    color: black; /* Example color for medium glycemic index */
-}
-
-.glycemic-high {
-    background-color: red;
-    color: white; /* Example color for high glycemic index */
-}
-
-
+            color: #fff;
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+        }
+        .glycemic-low {
+            background-color: green;
+            color: white;
+        }
+        .glycemic-medium {
+            background-color: yellow;
+            color: black;
+        }
+        .glycemic-high {
+            background-color: red;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -56,11 +52,14 @@
             </div>
         </div>
         <div class="mb-3">
-            <button class="btn btn-info" data-filter="Bajo" data-column="Índice Glicémico" onclick="applyQuickFilter('Bajo', 'Índice Glicémico')">Índice Glicémico Bajo</button>
-            <button class="btn btn-info" data-filter="Medio" data-column="Índice Glicémico" onclick="applyQuickFilter('Medio', 'Índice Glicémico')">Índice Glicémico Medio</button>
-            <button class="btn btn-info" data-filter="Alto" data-column="Índice Glicémico" onclick="applyQuickFilter('Alto', 'Índice Glicémico')">Índice Glicémico Alto</button>
-            <button class="btn btn-info" data-filter="Cereales y Pastas" data-column="Tipo" onclick="applyQuickFilter('Cereales y Pastas', 'Tipo')">Cereales y Pastas</button>
-            <button class="btn btn-info" data-filter="Pan" data-column="Tipo" onclick="applyQuickFilter('Pan', 'Tipo')">Pan</button>
+            <button class="btn btn-info" data-filter="Aceites y Grasas" data-column="Tipo" onclick="applyQuickFilter(this, 'Aceites y Grasas', 'Tipo')">Aceites y Grasas</button>
+            <button class="btn btn-info" data-filter="Bebestibles" data-column="Tipo" onclick="applyQuickFilter(this, 'Bebestibles', 'Tipo')">Bebestibles</button>
+            <button class="btn btn-info" data-filter="Carnes" data-column="Tipo" onclick="applyQuickFilter(this, 'Carnes', 'Tipo')">Carnes</button>
+            <button class="btn btn-info" data-filter="Cereales y Pastas" data-column="Tipo" onclick="applyQuickFilter(this, 'Cereales y Pastas', 'Tipo')">Cereales y Pastas</button>
+            <button class="btn btn-info" data-filter="Frutas" data-column="Tipo" onclick="applyQuickFilter(this, 'Frutas', 'Tipo')">Frutas</button>
+            <button class="btn btn-info" data-filter="Lácteos" data-column="Tipo" onclick="applyQuickFilter(this, 'Lácteos', 'Tipo')">Lácteos</button>
+            <button class="btn btn-info" data-filter="Pan" data-column="Tipo" onclick="applyQuickFilter(this, 'Pan', 'Tipo')">Pan</button>
+            <button class="btn btn-info" data-filter="Verduras" data-column="Tipo" onclick="applyQuickFilter(this, 'Verduras', 'Tipo')">Verduras</button>
         </div>
         <table id="data" class="table table-striped table-hover table-bordered">
             <thead class="thead-dark">
@@ -88,143 +87,134 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
-let allData = [];
-let currentPage = 1;
-let rowsPerPage = 15;
-let activeFilter = { filter: null, column: null };
+        let allData = [];
+        let currentPage = 1;
+        let rowsPerPage = 15;
+        let currentFilteredData = []; // This will hold the current filtered data
+        let activeFilter = { filter: null, column: null }; // Initialize activeFilter
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
-    setupFilterButtons();
-});
-
-async function loadData() {
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTDlIcXY8RUKAkHP8h4F4EkiOSuAJIrs8rb1E_8PuwWQTBdi0fAdDwYjt6khgP_2mzhKBcXYtkf8B-a/pub?gid=0&single=true&output=csv';
-    const response = await fetch(csvUrl);
-    const csvText = await response.text();
-    const results = Papa.parse(csvText, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true
-    });
-    allData = results.data;
-    updatePagination(allData);
-    displayData(allData);
-}
-
-function setupFilterButtons() {
-    document.querySelectorAll('.btn-info').forEach(button => {
-        button.addEventListener('click', function() {
-            const filterValue = this.dataset.filter;
-            const filterColumn = this.dataset.column;
-            if (activeFilter.filter === filterValue && activeFilter.column === filterColumn) {
-                // Toggle off if the same filter is clicked again
-                activeFilter = { filter: null, column: null };
-                this.classList.remove('active'); // Remove active class
-                filterData(); // Reapply filters or show all data
-            } else {
-                // Clear active states
-                document.querySelectorAll('.btn-info').forEach(b => b.classList.remove('active'));
-                // Apply new filter and mark button as active
-                this.classList.add('active');
-                activeFilter = { filter: filterValue, column: filterColumn };
-                filterData(); // Reapply filters based on the new selection
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
         });
-    });
-}
 
-function filterData() {
-    const query = document.getElementById('searchQuery').value.toLowerCase().trim();
-    let filteredData = allData;
-    if (query) {
-        filteredData = filteredData.filter(item =>
-            Object.keys(item).some(key => item[key] && item[key].toString().toLowerCase().includes(query))
-        );
-    }
-    if (activeFilter.filter) {
-        filteredData = filteredData.filter(item =>
-            item[activeFilter.column] && item[activeFilter.column].toLowerCase() === activeFilter.filter.toLowerCase()
-        );
-    }
-    updatePagination(filteredData);
-    displayData(filteredData);
-}
-
-function updatePagination(data) {
-    let pageCount = Math.ceil(data.length / rowsPerPage);
-    const paginationUl = document.getElementById('pagination');
-    paginationUl.innerHTML = '';
-    for (let i = 1; i <= pageCount; i++) {
-        let li = document.createElement('li');
-        li.className = 'page-item';
-        let a = document.createElement('a');
-        a.className = 'page-link';
-        a.href = '#';
-        a.textContent = i;
-        a.addEventListener('click', function(e) {
-            e.preventDefault();
-            currentPage = i;
-            displayData(data);
-        });
-        li.appendChild(a);
-        paginationUl.appendChild(li);
-    }
-}
-
-function displayData(data) {
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedItems = data.slice(startIndex, endIndex);
-
-    const tableBody = document.getElementById('data').getElementsByTagName('tbody')[0];
-    tableBody.innerHTML = '';
-    paginatedItems.forEach(item => {
-        const row = tableBody.insertRow();
-        Object.entries(item).forEach(([key, value]) => {
-            const cell = row.insertCell();
-            cell.textContent = value;
-            if (key === 'Índice Glicémico') {
-                cell.classList.add(getGlycemicIndexClass(value));
-            }
-        });
-    });
-    if (paginatedItems.length == 0) {
-        const row = tableBody.insertRow();
-        const cell = row.insertCell();
-        cell.setAttribute('colspan', '6');
-        cell.textContent = 'No results found';
-    }
-    setActivePage(currentPage);
-}
-
-function getGlycemicIndexClass(value) {
-    switch (value) {
-        case 'Bajo':
-            return 'glycemic-low';
-        case 'Medio':
-            return 'glycemic-medium';
-        case 'Alto':
-            return 'glycemic-high';
-        default:
-            return '';
-    }
-}
-
-
-function setActivePage(num) {
-    let paginationLinks = document.querySelectorAll('#pagination li a');
-    paginationLinks.forEach(link => {
-        if (parseInt(link.innerText) === num) {
-            link.parentElement.classList.add('active');
-        } else {
-            link.parentElement.classList.remove('active');
+        async function loadData() {
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTDlIcXY8RUKAkHP8h4F4EkiOSuAJIrs8rb1E_8PuwWQTBdi0fAdDwYjt6khgP_2mzhKBcXYtkf8B-a/pub?gid=0&single=true&output=csv';
+            const response = await fetch(csvUrl);
+            const csvText = await response.text();
+            const results = Papa.parse(csvText, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            });
+            allData = results.data;
+            filterData(); // Initial filter and display
         }
-    });
-}
-</script>
 
+        function filterData() {
+            const query = document.getElementById('searchQuery').value.toLowerCase().trim();
+            let filteredData = allData;
+            if (query) {
+                filteredData = filteredData.filter(item => 
+                    Object.keys(item).some(key => 
+                        item[key] && item[key].toString().toLowerCase().includes(query))
+                );
+            }
+            if (activeFilter.filter) {
+                filteredData = filteredData.filter(item => 
+                    item[activeFilter.column] && item[activeFilter.column].toLowerCase() === activeFilter.filter.toLowerCase()
+                );
+            }
+            currentFilteredData = filteredData;
+            currentPage = 1; // Reset to first page on filter change
+            updatePagination();
+            displayData();
+        }
 
+        function applyQuickFilter(button, filterValue, columnName) {
+            if (activeFilter.filter === filterValue && activeFilter.column === columnName) {
+                // If the same filter is clicked, toggle it off
+                activeFilter = { filter: null, column: null };
+                button.classList.remove('active');
+            } else {
+                // Clear previous active states
+                document.querySelectorAll('.btn-info').forEach(btn => btn.classList.remove('active'));
+                // Set new active filter and add active class
+                activeFilter = { filter: filterValue, column: columnName };
+                button.classList.add('active');
+            }
+            filterData();
+        }
 
+        function updatePagination() {
+            let pageCount = Math.ceil(currentFilteredData.length / rowsPerPage);
+            const paginationUl = document.getElementById('pagination');
+            paginationUl.innerHTML = '';
+            for (let i = 1; i <= pageCount; i++) {
+                let li = document.createElement('li');
+                li.className = 'page-item';
+                let a = document.createElement('a');
+                a.className = 'page-link';
+                a.href = '#';
+                a.textContent = i;
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentPage = i;
+                    displayData();
+                });
+                li.appendChild(a);
+                paginationUl.appendChild(li);
+            }
+        }
+
+        function displayData() {
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedItems = currentFilteredData.slice(startIndex, endIndex);
+
+            const tableBody = document.getElementById('data').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            paginatedItems.forEach(item => {
+                const row = tableBody.insertRow();
+                Object.entries(item).forEach(([key, value]) => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                    if (key === 'Índice Glicémico') {
+                        cell.classList.add(getGlycemicIndexClass(value));
+                    }
+                });
+            });
+            if (paginatedItems.length == 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.setAttribute('colspan', '6');
+                cell.textContent = 'No results found';
+            }
+            setActivePage(currentPage);
+        }
+
+        function getGlycemicIndexClass(value) {
+            switch (value) {
+                case 'Bajo':
+                    return 'glycemic-low';
+                case 'Medio':
+                    return 'glycemic-medium';
+                case 'Alto':
+                    return 'glycemic-high';
+                default:
+                    return '';
+            }
+        }
+
+        function setActivePage(num) {
+            let paginationLinks = document.querySelectorAll('#pagination li a');
+            paginationLinks.forEach(link => {
+                if (parseInt(link.innerText) === num) {
+                    link.parentElement.classList.add('active');
+                } else {
+                    link.parentElement.classList.remove('active');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
