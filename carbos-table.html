@@ -42,10 +42,23 @@
             background-color: red;
             color: white;
         }
+        .spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-5">
+        <div class="spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
         <div class="row mb-3">
             <div class="col">
                 <input type="text" id="searchQuery" class="form-control" placeholder="Buscar alimento..." oninput="filterData()">
@@ -89,15 +102,16 @@
     <script>
         let allData = [];
         let currentPage = 1;
-        let rowsPerPage = 15;
-        let currentFilteredData = []; // This will hold the current filtered data
-        let activeFilter = { filter: null, column: null }; // Initialize activeFilter
+        let rowsPerPage = 10;
+        let currentFilteredData = [];
+        let activeFilter = { filter: null, column: null };
 
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
         });
 
         async function loadData() {
+            showSpinner();
             const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTDlIcXY8RUKAkHP8h4F4EkiOSuAJIrs8rb1E_8PuwWQTBdi0fAdDwYjt6khgP_2mzhKBcXYtkf8B-a/pub?gid=0&single=true&output=csv';
             const response = await fetch(csvUrl);
             const csvText = await response.text();
@@ -107,7 +121,16 @@
                 skipEmptyLines: true
             });
             allData = results.data;
-            filterData(); // Initial filter and display
+            hideSpinner();
+            filterData();
+        }
+
+        function showSpinner() {
+            document.querySelector('.spinner').style.display = 'block';
+        }
+
+        function hideSpinner() {
+            document.querySelector('.spinner').style.display = 'none';
         }
 
         function filterData() {
