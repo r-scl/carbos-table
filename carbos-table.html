@@ -7,50 +7,66 @@
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            background: #f4f4f9;
-        }
-        input[type="text"] {
-            padding: 10px;
-            margin: 10px 0;
-            width: 300px;
-            border: 2px solid #ddd;
-        }
-        #data tbody tr.highlight {
-            background-color: #fffbcc;
-        }
-        .pagination-wrapper nav {
-            margin-top: 20px;
-        }
-        .active {
-            color: #fff;
-            background-color: #007bff !important;
-            border-color: #007bff !important;
-        }
-        .glycemic-low {
-            background-color: green;
-            color: white;
-        }
-        .glycemic-medium {
-            background-color: yellow;
-            color: black;
-        }
-        .glycemic-high {
-            background-color: red;
-            color: white;
-        }
-        .spinner {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-        }
-    </style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        padding: 0;
+        background: #f4f4f9;
+    }
+    input[type="text"] {
+        padding: 10px;
+        margin: 10px 0;
+        width: 300px;
+        border: 2px solid #ddd;
+    }
+    #data tbody tr.highlight {
+        background-color: #fffbcc;
+    }
+    .pagination-wrapper nav {
+        margin-top: 20px;
+    }
+    .active {
+        color: #fff;
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+    }
+    .glycemic-low {
+        background-color: green;
+        color: white;
+    }
+    .glycemic-medium {
+        background-color: yellow;
+        color: black;
+    }
+    .glycemic-high {
+        background-color: red;
+        color: white;
+    }
+    .spinner {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+    }
+    table {
+        width: 100%;
+        table-layout: fixed;
+    }
+    th, td {
+        overflow: hidden;
+        word-wrap: break-word;
+        vertical-align: top;
+    }
+    th:nth-child(1), td:nth-child(1) { width: 20%; min-width: 120px; }
+    th:nth-child(2), td:nth-child(2) { width: 20%; min-width: 120px; }
+    th:nth-child(3), td:nth-child(3) { width: 15%; min-width: 80px; }
+    th:nth-child(4), td:nth-child(4) { width: 15%; min-width: 80px; }
+    th:nth-child(5), td:nth-child(5) { width: 15%; min-width: 80px; }
+    th:nth-child(6), td:nth-child(6) { width: 15%; min-width: 80px; }
+</style>
+
 </head>
 <body>
     <div class="container mt-5">
