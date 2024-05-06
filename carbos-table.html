@@ -31,16 +31,16 @@
         border-color: #007bff !important;
     }
     .glycemic-low {
-        background-color: #198753;
-        color: white;
+        color: #198753 !important;
+        font-weight: bold !important;
     }
     .glycemic-medium {
-        background-color: #FFC007;
-        color: black;
+        color: #FFC007 !important;
+        font-weight: bold !important;
     }
     .glycemic-high {
-        background-color: #DC3444;
-        color: white;
+        color: #DC3444 !important;
+        font-weight: bold !important;
     }
     .spinner {
         display: none;
@@ -206,43 +206,59 @@
         }
 
         function displayData() {
-            const startIndex = (currentPage - 1) * rowsPerPage;
-            const endIndex = startIndex + rowsPerPage;
-            const paginatedItems = currentFilteredData.slice(startIndex, endIndex);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedItems = currentFilteredData.slice(startIndex, endIndex);
 
-            const tableBody = document.getElementById('data').getElementsByTagName('tbody')[0];
-            tableBody.innerHTML = '';
-            paginatedItems.forEach(item => {
-                const row = tableBody.insertRow();
-                Object.entries(item).forEach(([key, value]) => {
-                    const cell = row.insertCell();
-                    cell.textContent = value;
-                    if (key === 'Índice Glicémico') {
-                        cell.classList.add(getGlycemicIndexClass(value));
-                    }
-                });
-            });
-            if (paginatedItems.length == 0) {
-                const row = tableBody.insertRow();
-                const cell = row.insertCell();
-                cell.setAttribute('colspan', '6');
-                cell.textContent = 'No results found';
+    const tableBody = document.getElementById('data').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = '';
+
+    paginatedItems.forEach(item => {
+        const row = tableBody.insertRow();
+        let columnIndex = 0; // To keep track of the current column index
+
+        Object.entries(item).forEach(([key, value]) => {
+            const cell = row.insertCell();
+            cell.textContent = value;
+
+            // Apply style only to the fifth column (4th index)
+            if (columnIndex === 4) {
+                const className = getGlycemicIndexClass(value);
+                if (className) {
+                    cell.classList.add(className);
+                }
             }
-            setActivePage(currentPage);
-        }
+            columnIndex++; // Increment column index after processing each cell
+        });
+    });
+
+    if (paginatedItems.length == 0) {
+        const row = tableBody.insertRow();
+        const cell = row.insertCell();
+        cell.setAttribute('colspan', '6');
+        cell.textContent = 'No se encontraron resultados.';
+    }
+
+    setActivePage(currentPage);
+}
+
 
         function getGlycemicIndexClass(value) {
-            switch (value) {
-                case 'Bajo':
-                    return 'glycemic-low';
-                case 'Medio':
-                    return 'glycemic-medium';
-                case 'Alto':
-                    return 'glycemic-high';
-                default:
-                    return '';
-            }
-        }
+    const normalizedValue = value.toString().trim().toLowerCase();
+    switch (normalizedValue) {
+        case 'bajo':
+            return 'glycemic-low';
+        case 'medio':
+            return 'glycemic-medium';
+        case 'alto':
+            return 'glycemic-high';
+        default:
+            console.error('Unmatched Glycemic Index value:', value); // More explicit error logging
+            return '';
+    }
+}
+
+
 
         function setActivePage(num) {
             let paginationLinks = document.querySelectorAll('#pagination li a');
